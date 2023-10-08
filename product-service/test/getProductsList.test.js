@@ -1,5 +1,5 @@
-import { handler as getProductsList } from "../handlers/getProductsList.js";
-import products from "../data/products.json";
+import { handler as getProductsList } from "../handlers/getProductsList.mjs";
+import products from "../data/products.js";
 
 describe("getProductsList", () => {
   it("should return a list of all products", async () => {

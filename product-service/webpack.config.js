@@ -1,26 +1,30 @@
 const path = require("path");
-const nodeExternals = require("webpack-node-externals");
 
 module.exports = {
-  entry: "./handler.js",
-  target: "node",
   mode: "production",
-  externals: [nodeExternals()],
+  entry: "./handler.js",
   output: {
-    path: path.resolve(__dirname, "dist"),
+    libraryTarget: "commonjs",
+    path: path.join(__dirname, "dist"),
     filename: "handler.js",
-    libraryTarget: "commonjs2",
   },
-  resolve: {
-    extensions: [".js", ".json"],
-  },
+  target: "node",
   module: {
     rules: [
       {
-        test: /\.json$/,
-        loader: "json-loader",
-        type: "javascript/auto",
+        test: /\.(mjs|js|jsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+        },
       },
+      {
+        test: /\.json$/,
+        loader: "json-loader"
+      }
     ],
+  },
+  resolve: {
+    extensions: [".mjs", ".json", ".jsx", ".js"],
   },
 };

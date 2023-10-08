@@ -58,7 +58,7 @@ provider:
 
 functions:
   getProductsList:
-    handler: handler.getProductsList
+    handler: dist/handler.getProductsList
     events:
       - http:
           path: products
@@ -78,7 +78,7 @@ functions:
                     ref: "Product"
 
   getProductsById:
-    handler: handler.getProductsById
+    handler: dist/handler.getProductsById
     events:
       - http:
           path: products/{id}

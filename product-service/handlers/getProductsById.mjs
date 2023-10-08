@@ -1,4 +1,4 @@
-import products from "../data/products.json" assert { type: "json" };
+import products from "../data/products.js";
 
 const getProductsById = async (event) => {
   const { id } = event.pathParameters;
