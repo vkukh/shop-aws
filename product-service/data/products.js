@@ -53,6 +53,6 @@ export default [
     "description": "Short Product Description7",
     "id": "7567ec4b-b10c-45c5-9345-fc73c48a80a1",
     "price": 15,
-    "title": "Vertu"
+    "title": "Vertu-1"
   }
 ]
