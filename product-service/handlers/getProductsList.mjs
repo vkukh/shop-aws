@@ -3,31 +3,39 @@ import { dynamoDb } from './dynamoDb.js';
 const { PRODUCTS_TABLE, STOCKS_TABLE } = process.env;
 
 const getProductsList = async (event) => {
-  const productsResponse = await dynamoDb
+  try {
+    const productsResponse = await dynamoDb
     .scan({ TableName: PRODUCTS_TABLE })
     .promise();
-  const stocksResponse = await dynamoDb
-    .scan({ TableName: STOCKS_TABLE })
-    .promise();
+    const stocksResponse = await dynamoDb
+      .scan({ TableName: STOCKS_TABLE })
+      .promise();
 
-  const products = productsResponse.Items;
-  const stocks = stocksResponse.Items;
+    const products = productsResponse.Items;
+    const stocks = stocksResponse.Items;
 
-  const productList = products.map((product) => {
-    const productStock = stocks.find(
-      (stock) => stock.product_id === product.id
-    );
+    const productList = products.map((product) => {
+      const productStock = stocks.find(
+        (stock) => stock.product_id === product.id
+      );
+
+      return {
+        ...product,
+        count: productStock ? productStock.count : 0,
+      };
+    });
 
     return {
-      ...product,
-      count: productStock ? productStock.count : 0,
+      statusCode: 200,
+      body: JSON.stringify(productList),
     };
-  });
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(productList),
-  };
+  } catch (error) {
+    const errorMessage = error.message || 'Unknown error';
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: errorMessage }),
+    };
+  }
 };
 
 export { getProductsList as handler };
