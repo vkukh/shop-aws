@@ -1,13 +1,12 @@
-import AWS from 'aws-sdk';
+import { dynamoDb } from './dynamoDb.js';
 
 const { PRODUCTS_TABLE, STOCKS_TABLE } = process.env;
-const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
 const getProductsList = async (event) => {
-  const productsResponse = await dynamoDB
+  const productsResponse = await dynamoDb
     .scan({ TableName: PRODUCTS_TABLE })
     .promise();
-  const stocksResponse = await dynamoDB
+  const stocksResponse = await dynamoDb
     .scan({ TableName: STOCKS_TABLE })
     .promise();
 

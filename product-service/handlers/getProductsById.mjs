@@ -16,22 +16,22 @@ const getProductsById = async (event) => {
     const product = productRes.Item;
 
     const stockRes = await dynamoDb
-    .query({
-      TableName: STOCKS_TABLE,
-      IndexName: 'ProductIndex',
-      KeyConditionExpression: 'product_id = :id',
-      ExpressionAttributeValues: {
-        ':id': id,
-      },
-    })
-    .promise();
-    console.log(stockRes)
+      .query({
+        TableName: STOCKS_TABLE,
+        IndexName: 'ProductIndex',
+        KeyConditionExpression: 'product_id = :id',
+        ExpressionAttributeValues: {
+          ':id': id,
+        },
+      })
+      .promise();
+
     const stock = stockRes.Items && stockRes.Items[0];
 
-    if (!stock) {
+    if (!stock || !product) {
       return {
         statusCode: 404,
-        body: JSON.stringify({ message: 'Product not found' }),
+        body: JSON.stringify({ message: 'Not found' }),
       };
     }
 
@@ -42,9 +42,11 @@ const getProductsById = async (event) => {
       body: JSON.stringify(responseProduct),
     };
   } catch (error) {
+    console.log("Error in getProductsById:", error);
+    const errorMessage = error.message || 'Unknown error';
     return {
       statusCode: 500,
-      body: JSON.stringify({ error }),
+      body: JSON.stringify({ error: errorMessage }),
     };
   }
 };

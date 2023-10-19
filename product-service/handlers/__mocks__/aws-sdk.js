@@ -1,7 +1,11 @@
+const getMock = jest.fn();
+const queryMock = jest.fn();
+const scanMock = jest.fn();
+
 const mockDynamoDB = {
-  scan: () => ({
-    promise: jest.fn().mockResolvedValue({ Items: [] }),
-  }),
+  get: () => ({ promise: getMock }),
+  query: () => ({ promise: queryMock }),
+  scan: () => ({ promise: scanMock }),
 };
 
 const AWS = {
