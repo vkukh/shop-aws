@@ -36,12 +36,21 @@ provider:
             - dynamodb:Scan
             - dynamodb:GetItem
             - dynamodb:Query
+            - dynamodb:PutItem
           Resource:
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.PRODUCTS_TABLE}"
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.STOCKS_TABLE}"
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.STOCKS_TABLE}/index/ProductIndex"
 
 functions:
+  createProduct:
+    handler: dist/handler.createProduct
+    events:
+      - http:
+          path: products
+          method: post
+          cors: true
+
   getProductsList:
     handler: dist/handler.getProductsList
     events:
