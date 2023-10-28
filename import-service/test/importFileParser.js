@@ -1,55 +1,59 @@
-const AWSMock = require("aws-sdk-mock");
-const { expect } = require("chai");
-const sinon = require("sinon");
-const { Readable } = require("stream");
-const AWS = require("aws-sdk");
+import dotenv from 'dotenv';
+import { Readable } from "stream";
+import { S3 } from '@aws-sdk/client-s3';
+import sinon from "sinon";
+import { expect } from "chai";
+import { CopyObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 
-import { handler as importFileParserHandler } from './importFileParser';
+import { handler as importFileParserHandler } from "../handlers/importFileParser.mjs";
+dotenv.config();
+
+const { BUCKET_NAME_ENV } = process.env;
 
 describe("importFileParser", () => {
+  let sendStub;
+  let consoleLogSpy;
+
   beforeEach(() => {
-    AWSMock.setSDKInstance(AWS);
+    process.env.AWS_REGION = "eu-west-1";
+
+    sendStub = sinon.stub(S3.prototype, 'send').callsFake(async function (command) {
+      if (command instanceof GetObjectCommand) {
+        const sampleCsvStream = Readable.from(
+          "id,name,description\n1,product1,description1\n2,product2,description2"
+        );
+        return { Body: sampleCsvStream };
+      } else if (command instanceof CopyObjectCommand || command instanceof DeleteObjectCommand) {
+        return {};
+      }
+    });
+
+    consoleLogSpy = sinon.spy();
+    sinon.replace(console, "log", consoleLogSpy);
   });
 
   afterEach(() => {
-    AWSMock.restore();
     sinon.restore();
   });
 
   it("should process the file and return a success message", async () => {
-    const sampleCsvStream = Readable.from(
-      "id,name,description\n1,product1,description1\n2,product2,description2"
-    );
-
-    AWSMock.mock("S3", "getObject", (params, callback) => {
-      callback(null, {
-        Body: sampleCsvStream,
-        ContentType: "text/csv",
-        ContentLength: sampleCsvStream.length,
-        Bucket: params.Bucket,
-        Key: params.Key,
-      });
-    });
-
     const event = {
       Records: [
         {
           s3: {
             bucket: {
-              name: "test-bucket",
+              name: BUCKET_NAME_ENV,
             },
             object: {
-              key: "uploaded/sample.csv",
+              key: 'parsed/example.csv',
             },
           },
         },
       ],
     };
 
-    const logSpy = sinon.spy();
-    sinon.replace(console, "log", logSpy);
-
     const result = await importFileParserHandler(event);
+
     expect(result).to.deep.equal({
       statusCode: 200,
       body: JSON.stringify(
@@ -66,8 +70,11 @@ describe("importFileParser", () => {
       { id: "2", name: "product2", description: "description2" },
     ];
 
-    for (const [, record] of logSpy.getCalls()) {
-      expect(record).to.deep.include(expectedRecords.shift());
+    for (const call of consoleLogSpy.getCalls()) {
+      if (call.args[0].startsWith("Parsed record:")) {
+        const record = call.args[1];
+        expect(record).to.deep.include(expectedRecords.shift());
+      }
     }
   });
 });
