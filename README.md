@@ -1,11 +1,11 @@
 # shop-aws
 
 ## The requested URL
-Generate url:
+**Generate url:**
 
 https://y9364thup9.execute-api.eu-west-1.amazonaws.com/dev/import?name=test01.csv
 
-Load file:
+**Load file:**
 
 curl --location --request PUT 'https://generated-url' \
 --header 'Content-Type: text/csv' \
