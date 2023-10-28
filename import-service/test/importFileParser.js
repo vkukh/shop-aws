@@ -4,7 +4,7 @@ const sinon = require("sinon");
 const { Readable } = require("stream");
 const AWS = require("aws-sdk");
 
-const { handler: importFileParserHandler } = require("./importFileParser");
+import { handler as importFileParserHandler } from './importFileParser';
 
 describe("importFileParser", () => {
   beforeEach(() => {

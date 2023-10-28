@@ -1,6 +1,6 @@
-const { S3, CopyObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-const aws = require("aws-sdk");
-const csvParser = require("csv-parser");
+import { S3, CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import aws from 'aws-sdk';
+import csvParser from 'csv-parser';
 
 const REGION = "eu-west-1";
 const s3 = new S3({ region: REGION });
