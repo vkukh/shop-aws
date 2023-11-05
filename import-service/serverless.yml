@@ -1,0 +1,44 @@
+service: import-service
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: eu-west-1
+  environment:
+    BUCKET_NAME: csv-loader-newgermes-new
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+        - s3:PutObject
+        - s3:CopyObject
+        - s3:DeleteObject
+      Resource:
+        - arn:aws:s3:::${self:provider.environment.BUCKET_NAME}/*
+
+functions:
+  importProductsFile:
+    handler: dist/handler.importProductsFile
+    events:
+      - http:
+          path: import
+          method: GET
+          request:
+            parameters:
+              querystrings:
+                name: true
+
+  importFileParser:
+    handler: dist/handler.importFileParser
+    events:
+      - s3:
+          bucket: ${self:provider.environment.BUCKET_NAME}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploaded/
+            - suffix: .csv
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
