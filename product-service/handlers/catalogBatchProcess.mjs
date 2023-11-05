@@ -47,6 +47,12 @@ export async function catalogBatchProcess(event) {
       Message: `Product "${data.title}" has been created.`,
       Subject: 'New product created',
       TopicArn: SNS_ARN,
+      MessageAttributes: {
+        price: {
+          DataType: 'Number', // Data type
+          StringValue: data.price.toString(), // Convert number to string
+        },
+      },
     };
     await sns.publish(snsParams).promise();
   }

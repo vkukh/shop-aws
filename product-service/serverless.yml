@@ -143,3 +143,21 @@ resources:
         Protocol: email
         Endpoint: kukhar.vitalii@gmail.com
         TopicArn: !Ref createProductTopic
+
+    cheapProductTopicSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: webgopro@gmail.com
+        TopicArn: !Ref createProductTopic
+        FilterPolicy:
+          price: [{ numeric: ["<=", 20] }] # <= 20
+
+    expensiveProductTopicSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: info.predel@gmail.com
+        TopicArn: !Ref createProductTopic
+        FilterPolicy:
+          price: [{ numeric: [">", 20] }] # > 20
