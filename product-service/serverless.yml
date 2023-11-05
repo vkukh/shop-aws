@@ -28,6 +28,10 @@ provider:
   environment:
     PRODUCTS_TABLE: products
     STOCKS_TABLE: stocks
+    SQS_QUEUE_URL:
+      Fn::GetAtt:
+        - catalogItemsQueue
+        - QueueURL
   iam:
     role:
       statements:
@@ -95,6 +99,16 @@ functions:
                 responseSchema:
                   ref: "Product"
 
+  catalogBatchProcess:
+    handler: dist/handler.catalogBatchProcess
+    events:
+      - sqs:
+          batchSize: 5
+          arn:
+            Fn::GetAtt:
+              - catalogItemsQueue
+              - Arn
+
 plugins:
   - serverless-aws-documentation
   - serverless-offline
@@ -133,4 +147,11 @@ custom:
             title:
               type: string
               description: "Product title"
+
+resources:
+  Resources:
+    catalogItemsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: catalogItemsQueue
 
