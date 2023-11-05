@@ -7,6 +7,7 @@ provider:
   region: eu-west-1
   environment:
     BUCKET_NAME: csv-loader-newgermes-new
+    SQS_QUEUE_URL: "https://sqs.eu-west-1.amazonaws.com/064446435005/catalogItemsQueue"
   iamRoleStatements:
     - Effect: Allow
       Action:
