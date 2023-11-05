@@ -8,15 +8,22 @@ provider:
   environment:
     BUCKET_NAME: csv-loader-newgermes-new
     SQS_QUEUE_URL: "https://sqs.eu-west-1.amazonaws.com/064446435005/catalogItemsQueue"
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - s3:GetObject
-        - s3:PutObject
-        - s3:CopyObject
-        - s3:DeleteObject
-      Resource:
-        - arn:aws:s3:::${self:provider.environment.BUCKET_NAME}/*
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+            - s3:CopyObject
+            - s3:DeleteObject
+          Resource:
+            - arn:aws:s3:::${self:provider.environment.BUCKET_NAME}/*
+
+        - Effect: "Allow"
+          Action:
+            - "sqs:SendMessage"
+          Resource: "arn:aws:sqs:eu-west-1:064446435005:catalogItemsQueue"
 
 functions:
   importProductsFile:
@@ -43,3 +50,4 @@ functions:
 plugins:
   - serverless-dotenv-plugin
   - serverless-offline
+  

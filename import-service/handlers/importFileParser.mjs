@@ -24,11 +24,20 @@ const importFileParser = async (event) => {
     // Process CSV records using the `csv-parser` package and send each record to SQS
     const parserStream = s3Stream.pipe(csvParser());
     parserStream.on('data', async (record) => {
-      console.log('Sending record to SQS:', record);
+      // Convert price and count to numbers
+      const data = {
+        id: record.id,
+        title: record.title,
+        description: record.description,
+        price: Number(record.price),
+        count: Number(record.count),
+      };
+
+      console.log('Sending record to SQS:', data);
 
       await sqs.sendMessage({
         QueueUrl: process.env.SQS_QUEUE_URL,
-        MessageBody: JSON.stringify(record),
+        MessageBody: JSON.stringify(data),
       }).promise();
     });
 

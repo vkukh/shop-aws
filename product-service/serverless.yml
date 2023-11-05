@@ -22,6 +22,7 @@ provider:
             - dynamodb:GetItem
             - dynamodb:Query
             - dynamodb:PutItem
+            - sns:Publish
           Resource:
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.PRODUCTS_TABLE}"
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.STOCKS_TABLE}"

@@ -1,17 +1,31 @@
 import AWS from 'aws-sdk';
+import { v4 as uuidv4 } from 'uuid';
 
 const { PRODUCTS_TABLE, STOCKS_TABLE, SNS_ARN } = process.env;
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const sns = new AWS.SNS();
 
 export async function catalogBatchProcess(event) {
+  console.log("catalogBatchProcess triggered with event:", event);
+
+  if (!event.Records || event.Records.length === 0) {
+    console.warn("No records to process");
+    return;
+  }
+
   for (const record of event.Records) {
     const data = JSON.parse(record.body);
+
+    console.log("Processing record data from SQS:", data);
 
     const params = {
       TableName: PRODUCTS_TABLE,
       Item: {
-        ...data,
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        price: Number(data.price),
+        count: Number(data.count),
       },
     };
 
@@ -20,8 +34,9 @@ export async function catalogBatchProcess(event) {
     const stockParams = {
       TableName: STOCKS_TABLE,
       Item: {
+        id: uuidv4(),
         product_id: data.id,
-        count: data.count,
+        count: Number(data.count),
       },
     };
 
