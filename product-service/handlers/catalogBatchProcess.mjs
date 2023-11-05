@@ -42,15 +42,14 @@ export async function catalogBatchProcess(event) {
 
     await dynamoDb.put(stockParams).promise();
 
-    // Send SNS notification
     const snsParams = {
       Message: `Product "${data.title}" has been created.`,
       Subject: 'New product created',
       TopicArn: SNS_ARN,
       MessageAttributes: {
         price: {
-          DataType: 'Number', // Data type
-          StringValue: data.price.toString(), // Convert number to string
+          DataType: 'Number',
+          StringValue: data.price.toString(),
         },
       },
     };

@@ -15,16 +15,13 @@ const importFileParser = async (event) => {
   console.log(`Processing file: ${s3ObjectKey}`);
 
   try {
-    // Read the CSV file from S3 as a stream
     const s3Stream = s3v2.getObject({
       Bucket: record.s3.bucket.name,
       Key: s3ObjectKey,
     }).createReadStream();
 
-    // Process CSV records using the `csv-parser` package and send each record to SQS
     const parserStream = s3Stream.pipe(csvParser());
     parserStream.on('data', async (record) => {
-      // Convert price and count to numbers
       const data = {
         id: record.id,
         title: record.title,
@@ -41,13 +38,11 @@ const importFileParser = async (event) => {
       }).promise();
     });
 
-    // Wait for the stream to end
     await new Promise((resolve, reject) => {
       parserStream.on('end', resolve);
       parserStream.on('error', reject);
     });
 
-    // Move file to the "processed" folder
     const copyParams = {
       Bucket: record.s3.bucket.name,
       CopySource: `${record.s3.bucket.name}/${s3ObjectKey}`,
@@ -55,7 +50,6 @@ const importFileParser = async (event) => {
     };
     await s3.send(new CopyObjectCommand(copyParams));
 
-    // Delete the original file
     const deleteParams = {
       Bucket: record.s3.bucket.name,
       Key: s3ObjectKey,
