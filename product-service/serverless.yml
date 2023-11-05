@@ -12,12 +12,7 @@
 # Happy Coding!
 
 service: product-service
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
 
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
 frameworkVersion: "3"
 
 provider:
@@ -32,6 +27,9 @@ provider:
       Fn::GetAtt:
         - catalogItemsQueue
         - QueueURL
+    SNS_ARN:
+      Fn::Ref: createProductTopic
+
   iam:
     role:
       statements:
@@ -154,4 +152,18 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: catalogItemsQueue
+
+    createProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: "Create product topic"
+        TopicName: createProductTopic
+
+    topicSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: your-email@example.com
+        TopicArn:
+          Fn::Ref: createProductTopic
 
