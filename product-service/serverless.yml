@@ -1,16 +1,3 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
 service: product-service
 
 frameworkVersion: "3"
@@ -23,12 +10,8 @@ provider:
   environment:
     PRODUCTS_TABLE: products
     STOCKS_TABLE: stocks
-    SQS_QUEUE_URL:
-      Fn::GetAtt:
-        - catalogItemsQueue
-        - QueueURL
-    SNS_ARN:
-      Fn::Ref: createProductTopic
+    SQS_QUEUE_URL: !Ref catalogItemsQueue
+    SNS_ARN: !Ref createProductTopic
 
   iam:
     role:
@@ -102,10 +85,7 @@ functions:
     events:
       - sqs:
           batchSize: 5
-          arn:
-            Fn::GetAtt:
-              - catalogItemsQueue
-              - Arn
+          arn: !GetAtt catalogItemsQueue.Arn
 
 plugins:
   - serverless-aws-documentation
@@ -163,7 +143,5 @@ resources:
       Type: AWS::SNS::Subscription
       Properties:
         Protocol: email
-        Endpoint: your-email@example.com
-        TopicArn:
-          Fn::Ref: createProductTopic
-
+        Endpoint: kukhar.vitalii@gmail.com
+        TopicArn: !Ref createProductTopic
