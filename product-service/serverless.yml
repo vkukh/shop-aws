@@ -1,23 +1,5 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
 service: product-service
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
 
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
 frameworkVersion: "3"
 
 provider:
@@ -28,6 +10,9 @@ provider:
   environment:
     PRODUCTS_TABLE: products
     STOCKS_TABLE: stocks
+    SQS_QUEUE_URL: !Ref catalogItemsQueue
+    SNS_ARN: !Ref createProductTopic
+
   iam:
     role:
       statements:
@@ -37,10 +22,8 @@ provider:
             - dynamodb:GetItem
             - dynamodb:Query
             - dynamodb:PutItem
-          Resource:
-            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.PRODUCTS_TABLE}"
-            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.STOCKS_TABLE}"
-            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.STOCKS_TABLE}/index/ProductIndex"
+            - sns:Publish
+          Resource: "*"
 
 functions:
   createProduct:
@@ -95,6 +78,13 @@ functions:
                 responseSchema:
                   ref: "Product"
 
+  catalogBatchProcess:
+    handler: dist/handler.catalogBatchProcess
+    events:
+      - sqs:
+          batchSize: 5
+          arn: !GetAtt catalogItemsQueue.Arn
+
 plugins:
   - serverless-aws-documentation
   - serverless-offline
@@ -134,3 +124,40 @@ custom:
               type: string
               description: "Product title"
 
+resources:
+  Resources:
+    catalogItemsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: catalogItemsQueue
+
+    createProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: "Create product topic"
+        TopicName: createProductTopic
+
+    topicSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: kukhar.vitalii@gmail.com
+        TopicArn: !Ref createProductTopic
+
+    cheapProductTopicSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: webgopro@gmail.com
+        TopicArn: !Ref createProductTopic
+        FilterPolicy:
+          price: [{ numeric: ["<=", 20] }] # <= 20
+
+    expensiveProductTopicSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        Endpoint: info.predel@gmail.com
+        TopicArn: !Ref createProductTopic
+        FilterPolicy:
+          price: [{ numeric: [">", 20] }] # > 20
