@@ -1,7 +1,5 @@
 # shop-aws
 
-## (SQS & SNS, Async Microservices Communication)
-
 ## The requested URL
 **Generate url:**
 
